@@ -293,7 +293,7 @@ class PostController extends QueryController
             $menu[] = [["text" => get_button('menu'), "callback_data" => "Home:start"]];
             return $this->query->message->edit("La sessione del post è scaduta!\nPuoi ricrearlo quando vuoi!", $menu);
         }
-        $formats = ["Markdown", "HTML"];
+        $formats = ["MarkdownV2", "HTML"];
         $post->setTextFormat($formats[$value]);
         $this->cacheService->updateTempPost($postId, $post);
         return $this->new($postId);

@@ -46,65 +46,44 @@ class PostsManagerService
                 }
             }
             $messageTg = TelegramClient::sendMessage(
-                $channel_id,
-                $text,
-                $post->getTextFormat(),
-                null,
-                !$post->isPreviewLinkAllowed(),
-                !$post->isNotifyEnabled(),
-                $post->isProtected(),
-                null,
-                null,
-                $post->getKeyboard() !== null ? ['inline_keyboard' => $post->getKeyboard()] : null
+                chat_id: $channel_id,
+                text: $text,
+                parse_mode: $post->getTextFormat(),
+                disable_web_page_preview: !$post->isPreviewLinkAllowed(),
+                disable_notification: !$post->isNotifyEnabled(),
+                protect_content: $post->isProtected(),
+                reply_markup: $post->getKeyboard() !== null ? ['inline_keyboard' => $post->getKeyboard()] : null
             );
         } else {
             if ($post->getMediaType() == 'photo') {
                 $messageTg = TelegramClient::sendPhoto(
-                    $channel_id,
-                    $post->getMediaId(),
-                    $post->getCaption(),
-                    $post->getKeyboard() ?? null,
-                    $post->getTextFormat(),
-                    null,
-                    !$post->isNotifyEnabled(),
-                    $post->isProtected(),
-                    null,
-                    null
+                    chat_id: $channel_id,
+                    photo: $post->getMediaId(),
+                    caption: $post->getCaption(),
+                    reply_markup: $post->getKeyboard() ?? null,
+                    parse_mode: $post->getTextFormat(),
+                    disable_notification:  !$post->isNotifyEnabled(),
+                    protect_content: $post->isProtected()
                 );
             } elseif ($post->getMediaType() == 'video') {
                 $messageTg = TelegramClient::sendVideo(
-                    $channel_id,
-                    $post->getMediaId(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    $post->getCaption(),
-                    $post->getTextFormat(),
-                    null,
-                    true,
-                    !$post->isNotifyEnabled(),
-                    $post->isProtected(),
-                    null,
-                    null,
-                    $post->getKeyboard() !== null ? ['inline_keyboard' => $post->getKeyboard()] : null,
+                    chat_id: $channel_id,
+                    video: $post->getMediaId(),
+                    caption: $post->getCaption(),
+                    parse_mode:  $post->getTextFormat(),
+                    disable_notification: !$post->isNotifyEnabled(),
+                    protect_content: $post->isProtected(),
+                    reply_markup: $post->getKeyboard() !== null ? ['inline_keyboard' => $post->getKeyboard()] : null,
                 );
             } elseif ($post->getMediaType() == 'gif') {
                 $messageTg = TelegramClient::sendAnimation(
-                    $channel_id,
-                    $post->getMediaId(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    $post->getCaption(),
-                    $post->getTextFormat(),
-                    null,
-                    !$post->isNotifyEnabled(),
-                    $post->isProtected(),
-                    null,
-                    null,
-                    $post->getKeyboard() !== null ? ['inline_keyboard' => $post->getKeyboard()] : null,
+                    chat_id: $channel_id,
+                    animation: $post->getMediaId(),
+                    caption: $post->getCaption(),
+                    parse_mode: $post->getTextFormat(),
+                    disable_notification: !$post->isNotifyEnabled(),
+                    protect_content: $post->isProtected(),
+                    reply_markup: $post->getKeyboard() !== null ? ['inline_keyboard' => $post->getKeyboard()] : null,
                 );
             }
         }
@@ -123,7 +102,7 @@ class PostsManagerService
             if ($schedule_id !== null) {
                 $this->schedulesRepository->updateStatus($schedule_id, 'SENT_FAILED');
             }
-            $this->logger->warning("Post $postId wasn't send", json_encode($messageTg, JSON_PRETTY_PRINT));
+            $this->logger->error("Post $postId wasn't send", json_encode($messageTg, JSON_PRETTY_PRINT));
         }
     }
 

@@ -8,8 +8,8 @@ use App\Core\Controllers\Telegram\MessageController;
 use App\Core\Controllers\Telegram\UserController;
 use App\Core\Logger\LoggerInterface;
 use App\Core\Modules\DatetimeUtility;
-use App\Core\ORM\Entities\Schedule;
 use App\Core\Services\CacheService;
+use App\Core\Services\ParserService;
 use App\Integrations\Telegram\Message;
 use App\Integrations\Telegram\TelegramClient;
 use App\Integrations\Telegram\Utility;
@@ -22,7 +22,7 @@ class PostController extends MessageController
         Message $message,
         UserController $user,
         LoggerInterface $logger,
-        CacheService $cacheService
+        CacheService $cacheService,
     )
     {
         parent::__construct($message, $user, $logger);
@@ -38,7 +38,30 @@ class PostController extends MessageController
             return $this->message->reply("La sessione del post è scaduta!\nPuoi ricrearlo quando vuoi!", $menu);
         }
         if (isset($this->message->text)) {
-            $post->setCaption($this->message->text);
+            if ($this->message->entities === null) {
+                if ($post->getTextFormat() == 'Markdown') {
+                    $text = ParserService::validateMarkdown($this->message->text);
+                } else {
+                    $text = ParserService::validateHTML($this->message->text);
+                }
+                if ($text === false) {
+                    $menu[] = [
+                        ["text" => get_button('menu'), "callback_data" => "Home:start"],
+                        ["text" => get_button('back'), "callback_data" => "Post:mediaOrCaption|$postId"]
+                    ];
+                    return TelegramClient::editMessageText(
+                        chat_id: $this->message->chat_id,
+                        message_id: $post->getPrivateTempMessageId(),
+                        text: get_string('format_error'),
+                        parse_mode: 'Markdown',
+                        reply_markup: ['inline_keyboard' => $menu]
+                    );
+                }
+            } else {
+                $text = ParserService::entitiesToHtml($this->message->text, $this->message->entities);
+                $post->setTextFormat('HTML');
+            }
+            $post->setCaption($text);
             $this->cacheService->updateTempPost($postId, $post);
             $menu[] = [["text" => get_button('no_keyboard'), "callback_data" => "Post:noKeyboard|$postId"]];
             $menu[] = [
@@ -107,7 +130,7 @@ class PostController extends MessageController
         );
     }
 
-    public function sendCaption(int $postId)
+    public function sendCaption(int $postId): ?array
     {
         $this->message->delete();
         $post = $this->cacheService->getTempPost($postId);
@@ -115,7 +138,30 @@ class PostController extends MessageController
             $menu[] = [["text" => get_button('menu'), "callback_data" => "Home:start"]];
             return $this->message->reply("La sessione del post è scaduta!\nPuoi ricrearlo quando vuoi!", $menu);
         }
-        $post->setCaption($this->message->text);
+        if ($this->message->entities === null) {
+            if ($post->getTextFormat() == 'Markdown') {
+                $text = ParserService::validateMarkdown($this->message->text);
+            } else {
+                $text = ParserService::validateHTML($this->message->text);
+            }
+            if ($text === false) {
+                $menu[] = [
+                    ["text" => get_button('menu'), "callback_data" => "Home:start"],
+                    ["text" => get_button('back'), "callback_data" => "Post:mediaOrCaption|$postId"]
+                ];
+                return TelegramClient::editMessageText(
+                    chat_id: $this->message->chat_id,
+                    message_id: $post->getPrivateTempMessageId(),
+                    text: get_string('format_error'),
+                    parse_mode: 'Markdown',
+                    reply_markup: ['inline_keyboard' => $menu]
+                );
+            }
+        } else {
+            $text = ParserService::entitiesToHtml($this->message->text, $this->message->entities);
+            $post->setTextFormat('HTML');
+        }
+        $post->setCaption($text);
         $post->setKeyboard(null);
         $this->cacheService->updateTempPost($postId, $post);
         $menu[] = [["text" => get_button('no_keyboard'), "callback_data" => "Post:noKeyboard|$postId"]];
@@ -137,7 +183,7 @@ class PostController extends MessageController
         );
     }
 
-    public function sendKeyboard(int $postId)
+    public function sendKeyboard(int $postId): ?array
     {
         $this->message->delete();
         $post = $this->cacheService->getTempPost($postId);

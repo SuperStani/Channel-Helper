@@ -38,10 +38,6 @@ class PostsConsumer extends BaseConsumer
     {
         //$this->closeConnection();
         exec("pkill -f {$this->processName}", $output, $returnValue);
-
-        // If pkill returns 0, the process was terminated successfully
-        // If pkill returns 1, the process was not found
-        // If pkill returns 2, an error occurred
         return $returnValue === 0;
     }
 }

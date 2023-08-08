@@ -6,7 +6,7 @@ $it = [
         "back" => "◀️ INDIETRO",
         "next" => "AVANTI ▶️",
         "notify" => "🛎 NOTIFICHE",
-        "preview_link" =>  "🔥 ANTEPRIMA LINK",
+        "preview_link" => "🔥 ANTEPRIMA LINK",
         "formatter" => "⚙️FORMATTAZIONE",
         "protected" => "🔐 PROTETTO",
         "menu" => "🏡 MENU",
@@ -120,5 +120,9 @@ $it = [
     ],
     "scheduled_posts" => [
         "*Post programmati:*"
+    ],
+    "format_error" => [
+        "Validazione del testo errata!",
+        "Riprova:"
     ]
 ];

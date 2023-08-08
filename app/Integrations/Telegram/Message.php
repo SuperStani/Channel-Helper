@@ -15,6 +15,7 @@ class Message
     public mixed $animation;
     public ?array $keyboard;
     public mixed $forward_from_chat;
+    public ?array $entities;
 
     public function __construct(Update $update)
     {
@@ -32,7 +33,7 @@ class Message
         $this->animation = $message->animation ?? null;
         $this->keyboard = $message->reply_markup->inline_keyboard ?? null;
         $this->forward_from_chat = $message->forward_from_chat ?? null;
-        $message = null;
+        $this->entities = $message->entities ?? null;
     }
 
     public function reply(string $text, $menu = null, $parse = "Markdown", bool $disable_preview = false, $reply_to_message = null): ?array

@@ -30,12 +30,12 @@
   "require": {
     "ext-json": "*",
     "ext-pdo": "*",
-    "erusev/parsedown": "^1.7",
     "guzzlehttp/guzzle": "^7.0",
     "league/commonmark": "^2.4",
     "php-amqplib/php-amqplib": "^2.8",
     "php-di/php-di": "^6.4",
     "ext-libxml": "*",
-    "ext-dom": "*"
+    "ext-dom": "*",
+    "ext-mbstring": "*"
   }
 }

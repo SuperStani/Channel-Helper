@@ -56,7 +56,7 @@ class CacheService
         $post->setIsProtected(false);
         $post->setDatetimeScheduleSend(null);
         $post->setDatetimeScheduleEnd(null);
-        $post->setTextFormat("Markdown");
+        $post->setTextFormat("HTML");
         $post->setLinkMediaToCaption(false);
         $post->setCreatedBy($user_id);
         $this->redisController->setKey("NEW_POST_" . $id, serialize($post), 1800);
